@@ -32,7 +32,7 @@ RUN curl -fsSL "https://dl.google.com/go/go${GO_VERSION}.linux-amd64.tar.gz" -o 
     && tar -C /usr/local -xzf go.tar.gz \
     && rm -f go.tar.gz
 
-ENV PATH=$PATH:/usr/local/go/bin
+ENV PATH=/usr/local/go/bin:$PATH
 # Switch back to the non-root user for running code-server
 
 # Expose the default code-server port
