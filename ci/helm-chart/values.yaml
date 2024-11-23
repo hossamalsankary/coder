@@ -168,8 +168,7 @@ extraInitContainers: |
     volumeMounts:
       - name: data
         mountPath: /home/coder
-      - name: docker
-        mountPath: /var/run/docker.sock
+
 
 ## Additional code-server secret mounts
 extraSecretMounts: []
