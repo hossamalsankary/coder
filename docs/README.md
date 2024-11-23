@@ -48,7 +48,10 @@ To install, run:
 ```bash
 curl -fsSL https://code-server.dev/install.sh | sh
 ```
-
+using helm
+```bash
+ helm upgrade --install code-server   ci/helm-chart   --set persistence.enabled=true
+```
 When done, the install script prints out instructions for running and starting
 code-server.
 
