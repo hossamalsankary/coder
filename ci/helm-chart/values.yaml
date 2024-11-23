@@ -179,7 +179,7 @@ extraSecretMounts: []
   #   readOnly: true
 
 ## Additional code-server volume mounts
-extraVolumeMounts: []
+extraVolumeMounts: 
   - name: docker
     mountPath: /var/run/docker.sock
     readOnly: true
