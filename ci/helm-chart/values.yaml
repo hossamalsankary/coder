@@ -40,13 +40,13 @@ service:
   port: 8080
 
 ingress:
-  enabled: false
-  #annotations:
-  #  kubernetes.io/tls-acme: "true"
-  #hosts:
-  #  - host: code-server.example.loc
-  #    paths:
-  #      - /
+  enabled: true
+  annotations:
+    kubernetes.io/tls-acme: "true"
+  hosts:
+    - host: 
+      paths:
+        - /
   ingressClassName: ""
   #tls:
   #  - secretName: code-server
@@ -92,21 +92,10 @@ securityContext:
   fsGroup: 1000
   runAsUser: 1000
 
-resources: {}
-  # We usually recommend not to specify default resources and to leave this as a conscious
-  # choice for the user. This also increases chances charts run on environments with little
-  # resources, such as Minikube. If you do want to specify resources, uncomment the following
-  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-  # limits:
-  #   cpu: 100m
-  #   memory: 128Mi
-  # requests:
-  #  cpu: 100m
-  #  memory: 1000Mi
-
-nodeSelector: {}
-
-tolerations: []
+resources: 
+   requests:
+    cpu: 200m
+    memory: 1000Mi
 
 affinity: {}
 
@@ -157,23 +146,42 @@ extraContainers: |
 #    value: "overlay2"
 
 extraInitContainers: |
-# - name: customization
-#   image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
-#   imagePullPolicy: IfNotPresent
-#   env:
-#     - name: SERVICE_URL
-#       value: https://open-vsx.org/vscode/gallery
-#     - name: ITEM_URL
-#       value: https://open-vsx.org/vscode/item
-#   command:
-#     - sh
-#     - -c
-#     - |
-#       code-server --install-extension ms-python.python
-#       code-server --install-extension golang.Go
-#   volumeMounts:
-#     - name: data
-#       mountPath: /home/coder
+  - name: customization
+    image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+    imagePullPolicy: IfNotPresent
+    env:
+      - name: SERVICE_URL
+        value: https://open-vsx.org/vscode/gallery
+      - name: ITEM_URL
+        value: https://open-vsx.org/vscode/item
+    command:
+      - sh
+      - -c
+      - |
+        code-server --install-extension ms-python.python
+        code-server --install-extension golang.Go
+        code-server --install-extension hashicorp.terraform  
+        code-server --install-extension ms-azuretools.vscode-docker
+        code-server --install-extension streetsidesoftware.code-spell-checker 
+        code-server --install-extension timonwong.shellcheck
+        sudo apt-get update && sudo apt-get install -y unzip
+        T_VERSION="1.9.8" # Specify your desired Terraform version
+        sudo curl -fsSL "https://releases.hashicorp.com/terraform/${T_VERSION}/terraform_${T_VERSION}_linux_amd64.zip" -o terraform.zip
+        sudo unzip terraform.zip
+        sudo mv terraform /usr/local/bin/
+        sudo chmod +x /usr/local/bin/terraform
+        sudo rm -f terraform.zip
+        curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+        unzip awscliv2.zip
+        sudo ./aws/install
+        GO_VERSION="1.23.3"
+        curl -fsSL "https://dl.google.com/go/go${GO_VERSION}.linux-amd64.tar.gz" -o go.tar.gz
+        sudo tar -C /usr/local -xzf go.tar.gz
+        sudo rm -f go.tar.gz
+        export PATH="/usr/local/go/bin:$PATH" 
+    volumeMounts:
+      - name: data
+        mountPath: /home/coder
 
 ## Additional code-server secret mounts
 extraSecretMounts: []
