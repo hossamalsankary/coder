@@ -10,7 +10,7 @@ ENV PATH="/usr/local/go/bin:$PATH"
 USER root
 
 RUN apt-get update
-RUN apt install unzip \ curl \
+RUN apt install unzip \ 
     && apt-get install -y docker.io \
     && apt-get clean
 
