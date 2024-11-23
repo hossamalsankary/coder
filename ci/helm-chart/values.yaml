@@ -168,6 +168,8 @@ extraInitContainers: |
     volumeMounts:
       - name: data
         mountPath: /home/coder
+      - name: docker
+        mountPath: /var/run/docker.sock
 
 ## Additional code-server secret mounts
 extraSecretMounts: []
@@ -179,9 +181,9 @@ extraSecretMounts: []
 
 ## Additional code-server volume mounts
 extraVolumeMounts: []
-  # - name: extra-volume
-  #   mountPath: /mnt/volume
-  #   readOnly: true
+  - name: docker
+    mountPath: /var/run/docker.sock
+    readOnly: true
   #   existingClaim: volume-claim
   #   hostPath: ""
   #   emptyDir: {}

@@ -31,6 +31,7 @@ RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2
 RUN curl -fsSL "https://dl.google.com/go/go${GO_VERSION}.linux-amd64.tar.gz" -o go.tar.gz \
     && tar -C /usr/local -xzf go.tar.gz \
     && rm -f go.tar.gz
+
 ENV PATH=$PATH:/usr/local/go/bin
 # Switch back to the non-root user for running code-server
 
