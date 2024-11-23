@@ -1,0 +1,111 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: code-server
+  labels:
+    app.kubernetes.io/instance: code-server
+    app.kubernetes.io/name: code-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: code-server
+      app.kubernetes.io/name: code-server
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/instance: code-server
+        app.kubernetes.io/name: code-server
+    spec:
+      serviceAccountName: code-server
+      securityContext:
+        fsGroup: 1000  # Keep the default fsGroup
+      initContainers:
+        - name: init-chmod-data
+          image: busybox:latest
+          command:
+            - sh
+            - -c
+            - chown -R 1000:1000 /home/coder
+          securityContext:
+            runAsUser: 0
+          volumeMounts:
+            - name: data
+              mountPath: /home/coder
+        - name: customization
+          image: docker.io/hossamalsankary/coder:latest
+          command:
+            - sh
+            - -c
+            - |
+              code-server --install-extension ms-python.python
+              code-server --install-extension golang.Go
+              code-server --install-extension hashicorp.terraform
+              code-server --install-extension ms-azuretools.vscode-docker
+              code-server --install-extension streetsidesoftware.code-spell-checker
+              code-server --install-extension timonwong.shellcheck
+          env:
+            - name: SERVICE_URL
+              value: https://open-vsx.org/vscode/gallery
+            - name: ITEM_URL
+              value: https://open-vsx.org/vscode/item
+          volumeMounts:
+            - name: data
+              mountPath: /home/coder
+      containers:
+        - name: code-server
+          image: docker.io/hossamalsankary/coder:latest
+          imagePullPolicy: Always
+          env:
+            - name: DOCKER_HOST
+              value: tcp://localhost:2375
+            - name: PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: code-server
+                  key: password
+          ports:
+            - containerPort: 8080
+              name: http
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 5
+          resources:
+            requests:
+              cpu: 200m
+              memory: 1000Mi
+          volumeMounts:
+            - name: data
+              mountPath: /home/coder
+          securityContext:
+            runAsUser: 1000
+        - name: docker-dind
+          image: docker:20.10-dind
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            privileged: true
+          env:
+            - name: DOCKER_TLS_CERTDIR
+              value: ""
+            - name: DOCKER_DRIVER
+              value: "overlay2"
+          resources:
+            requests:
+              cpu: 250m
+              memory: 256Mi
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: code-server
+      restartPolicy: Always
