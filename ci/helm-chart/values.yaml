@@ -164,21 +164,7 @@ extraInitContainers: |
         code-server --install-extension ms-azuretools.vscode-docker
         code-server --install-extension streetsidesoftware.code-spell-checker 
         code-server --install-extension timonwong.shellcheck
-        sudo apt-get update && sudo apt-get install -y unzip
-        T_VERSION="1.9.8" # Specify your desired Terraform version
-        sudo curl -fsSL "https://releases.hashicorp.com/terraform/${T_VERSION}/terraform_${T_VERSION}_linux_amd64.zip" -o terraform.zip
-        sudo unzip terraform.zip
-        sudo mv terraform /usr/local/bin/
-        sudo chmod +x /usr/local/bin/terraform
-        sudo rm -f terraform.zip
-        curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-        unzip awscliv2.zip
-        sudo ./aws/install
-        GO_VERSION="1.23.3"
-        curl -fsSL "https://dl.google.com/go/go${GO_VERSION}.linux-amd64.tar.gz" -o go.tar.gz
-        sudo tar -C /usr/local -xzf go.tar.gz
-        sudo rm -f go.tar.gz
-        export PATH="/usr/local/go/bin:$PATH" 
+
     volumeMounts:
       - name: data
         mountPath: /home/coder
