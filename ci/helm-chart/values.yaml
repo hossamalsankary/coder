@@ -6,6 +6,7 @@ replicaCount: 1
 
 image:
   repository: docker.io/hossamalsankary/coder
+  tag: 'latest'
   pullPolicy: Always
 
 # Specifies one or more secrets to be used when pulling images from a
