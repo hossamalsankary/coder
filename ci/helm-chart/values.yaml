@@ -11,7 +11,6 @@ image:
 
 # Specifies one or more secrets to be used when pulling images from a
 # private container repository
-# https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry
 imagePullSecrets: []
 #  - name: registry-creds
 
@@ -22,17 +21,12 @@ hostnameOverride: ""
 serviceAccount:
   # Specifies whether a service account should be created
   create: true
-  # Annotations to add to the service account
   annotations: {}
-  # The name of the service account to use.
-  # If not set and create is true, a name is generated using the fullname template
   name: ""
 
 podAnnotations: {}
 
 podSecurityContext: {}
-  # fsGroup: 2000
-
 priorityClassName: ""
 
 service:
@@ -44,7 +38,7 @@ ingress:
   annotations:
     kubernetes.io/tls-acme: "true"
   hosts:
-    - host: 
+    - host: ""
       paths:
         - /
   ingressClassName: ""
@@ -57,16 +51,6 @@ ingress:
 extraArgs: []
   # These are the arguments normally passed to code-server; run
   # code-server --help for a list of available options.
-  #
-  # Each argument and parameter must have its own entry; if you use
-  # --param value on the command line, then enter it here as:
-  #
-  # - --param
-  # - value
-  #
-  # If you receive an error like "Unknown option --param value", it may be
-  # because both the parameter and value are specified as a single argument,
-  # rather than two separate arguments (e.g. "- --param value" on a line).
 
 # Optional additional environment variables
 extraVars: []
@@ -75,46 +59,35 @@ extraVars: []
 #  - name: DOCKER_HOST
 #    value: "tcp://localhost:2375"
 
-##
-## Init containers parameters:
-## volumePermissions: Change the owner of the persist volume mountpoint to RunAsUser:fsGroup
-##
 volumePermissions:
   enabled: true
   securityContext:
     runAsUser: 0
 
-## Pod Security Context
-## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
-##
 securityContext:
   enabled: true
   fsGroup: 1000
   runAsUser: 1000
 
 resources: 
-   requests:
+  requests:
     cpu: 200m
     memory: 1000Mi
 
 affinity: {}
 
-## Persist data to a persistent volume
 persistence:
   enabled: true
-  ## code-server data Persistent Volume Storage Class
-  ## If defined, storageClassName: <storageClass>
-  ## If set to "-", storageClassName: "", which disables dynamic provisioning
-  ## If undefined (the default) or set to null, no storageClassName spec is
-  ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
-  ##   GKE, AWS & OpenStack)
-  ##
-  # storageClass: "-"
   accessMode: ReadWriteOnce
   size: 10Gi
   annotations: {}
   # existingClaim: ""
   # hostPath: /data
+  extraVolumes:
+    - name: docker
+      hostPath:
+        path: /var/run/docker.sock
+        type: Socket
 
 lifecycle:
   enabled: false
@@ -125,8 +98,6 @@ lifecycle:
   #      - -c
   #      - curl -s -L SOME_SCRIPT | bash
 
-## Enable an Specify container in extraContainers.
-## This is meant to allow adding code-server dependencies, like docker-dind.
 extraContainers: |
 # If docker-dind is used, DOCKER_HOST env is mandatory to set in "extraVars"
 #- name: docker-dind
@@ -164,39 +135,17 @@ extraInitContainers: |
         code-server --install-extension ms-azuretools.vscode-docker
         code-server --install-extension streetsidesoftware.code-spell-checker 
         code-server --install-extension timonwong.shellcheck
-
     volumeMounts:
       - name: data
         mountPath: /home/coder
       - name: docker
         mountPath: /var/run/docker.sock
 
-
-## Additional code-server secret mounts
 extraSecretMounts: []
-  # - name: secret-files
-  #   mountPath: /etc/secrets
-  #   subPath: private.key # (optional)
-  #   secretName: code-server-secret-files
-  #   readOnly: true
-
-## Additional code-server volume mounts
 extraVolumeMounts: 
   - name: docker
     mountPath: /var/run/docker.sock
-    readOnly: true
-  #   existingClaim: volume-claim
-  #   hostPath: ""
-  #   emptyDir: {}
+    readOnly: false
 
 extraConfigmapMounts: []
-  # - name: certs-configmap
-  #   mountPath: /etc/code-server/ssl/
-  #   subPath: certificates.crt # (optional)
-  #   configMap: certs-configmap
-  #   readOnly: true
-
 extraPorts: []
-  # - name: minecraft
-  #   port: 25565
-  #   protocol: tcp
